@@ -47,7 +47,3 @@ if os.environ.get('USE_DOCKER') == 'yes':
 # TESTING
 # ------------------------------------------------------------------------------
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-
-
-# Celery
-CELERY_TASK_ALWAYS_EAGER = True

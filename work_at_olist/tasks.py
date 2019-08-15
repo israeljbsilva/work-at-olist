@@ -1,13 +1,16 @@
-import celery
+import sys
 
-from celery.utils.log import get_task_logger
-
-
-logger = get_task_logger(__name__)
+from background_task import background
 
 
-class PricingRulesCreateTask(celery.Task):
-    name = 'pricing_rules_calculate_call_price'
+@background()
+def task():  # pragma: no cover
+    """
+    Function to register a new task in the background.
 
-    def run(self, *args, **kwargs):
-        logger.info('Calculating the price of calls')
+    """
+    pass
+
+
+if 'process_tasks' in sys.argv:  # pragma: no cover
+    task(verbose_name='task')
