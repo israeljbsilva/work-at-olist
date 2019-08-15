@@ -15,3 +15,13 @@ class CallStartRecordSerializer(CallEndRecordSerializer, serializers.ModelSerial
     class Meta:
         fields = '__all__'
         model = CallStartRecord
+
+    def validate(self, data):
+        self._validate_phone_number(data.get('source'))
+        self._validate_phone_number(data.get('destination'))
+        return data
+
+    @staticmethod
+    def _validate_phone_number(field):
+        if len(field) <= 9 or not field.isdigit():
+            raise serializers.ValidationError('Only 10 or 11 numbers. With area code.')

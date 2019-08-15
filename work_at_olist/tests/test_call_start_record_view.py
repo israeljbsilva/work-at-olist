@@ -51,3 +51,28 @@ def test_should_not_create_call_start_record(customer_client):
         'source': ['Este campo é obrigatório.'],
         'destination': ['Este campo é obrigatório.']
     }
+
+
+def test_should_not_create_call_start_record_with_phone_number_less_than_or_equal_to_9(customer_client):
+    # GIVEN
+    call_id = uuid.uuid4()
+    call_start_record_data = {
+        'call_id': str(call_id),
+        'timestamp': str(timezone.now()),
+        'source': '988526423',
+        'destination': '33468278'
+    }
+
+    # WHEN
+    response = customer_client.post(
+        f'{RESOURCE_PATH}/call-start-record', data=json.dumps(call_start_record_data), content_type='application/json')
+
+    # THEN
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    content = json.loads(response.content.decode())
+    assert content == {
+        "non_field_errors": [
+            "Only 10 or 11 numbers. With area code."
+        ]
+    }
