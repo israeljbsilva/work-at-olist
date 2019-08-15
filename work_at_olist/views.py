@@ -5,8 +5,8 @@ from django.utils import timezone
 
 from rest_framework import viewsets
 
-from .models import CallStartRecord
-from .serializers import CallStartRecordSerializer
+from .models import CallStartRecord, CallEndRecord
+from .serializers import CallStartRecordSerializer, CallEndRecordSerializer
 
 
 def ping(request):
@@ -21,3 +21,8 @@ def ping(request):
 class CallStartRecordView(viewsets.ModelViewSet):
     queryset = CallStartRecord.objects.all()
     serializer_class = CallStartRecordSerializer
+
+
+class CallEndRecordView(viewsets.ModelViewSet):
+    queryset = CallEndRecord.objects.all()
+    serializer_class = CallEndRecordSerializer

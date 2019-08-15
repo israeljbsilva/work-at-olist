@@ -7,7 +7,7 @@ class CallEndRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = CallEndRecord
         fields = '__all__'
-        read_only_fields = 'id'
+        read_only_fields = ('id', )
 
 
 class CallStartRecordSerializer(CallEndRecordSerializer, serializers.ModelSerializer):

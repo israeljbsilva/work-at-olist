@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import path, include
 from rest_framework_nested import routers
 
-from .views import CallStartRecordView
+from .views import CallStartRecordView, CallEndRecordView
 
 
 app_name = 'work_at_olist'
@@ -26,7 +26,11 @@ app_name = 'work_at_olist'
 call_start_record_router = routers.DefaultRouter(trailing_slash=False)
 call_start_record_router.register(r'call-start-record', CallStartRecordView)
 
+call_end_record_router = routers.DefaultRouter(trailing_slash=False)
+call_end_record_router.register(r'call-end-record', CallEndRecordView)
+
 
 urlpatterns = [
-    path('', include(call_start_record_router.urls))
+    path('', include(call_start_record_router.urls)),
+    path('', include(call_end_record_router.urls))
 ]
