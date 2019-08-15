@@ -1,12 +1,14 @@
 import sys
 
+from decimal import Decimal
+
 from background_task import background
 
 from .models import CallEndRecord, CallStartRecord, TelephoneBill
 
 
 @background()
-def task_calculate_call_price():  # pragma: no cover
+def task_pricing_rules():  # pragma: no cover
     call_id_start_records = CallStartRecord.objects.values_list('call_id', flat=True)
     call_id_end_records = CallEndRecord.objects.values_list('call_id', flat=True)
 
@@ -19,7 +21,12 @@ def task_calculate_call_price():  # pragma: no cover
                     [call_start_record for call_start_record in CallStartRecord.objects.filter(call_id=call_id)][0]
                 call_end_record = \
                     [call_end_record for call_end_record in CallEndRecord.objects.filter(call_id=call_id)][0]
-                pass
+
+                timestamp_start = call_start_record.timestamp
+                timestamp_end = call_end_record.timestamp
+
+                _calculate_call_price(timestamp_start, timestamp_end)
+
 
                 #  realizar o calculo
 
@@ -41,5 +48,10 @@ def task_calculate_call_price():  # pragma: no cover
         pass
 
 
+def _calculate_call_price(timestamp_start: str, timestamp_end: str) -> Decimal:
+    dt = timestamp_start - timestamp_end
+    print(dt)
+
+
 if 'process_tasks' in sys.argv:  # pragma: no cover
-    task_calculate_call_price(verbose_name='task_calculate_call_price')
+    task_pricing_rules(verbose_name='task_pricing_rules')
