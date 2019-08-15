@@ -39,7 +39,7 @@ class TelephoneBill(models.Model):
     call_start_date = models.DateTimeField('CALL_START_DATE', null=False)
     call_start_time = models.TimeField('CALL_START_TIME', null=False)
     call_duration = models.TimeField('CALL_DURATION', null=False)
-    call_price = models.DecimalField(decimal_places=2, max_digits=17, default=Decimal("0.0"))
+    call_price = models.DecimalField(decimal_places=2, max_digits=17, default=Decimal("0.0"), null=False)
     source = CharField('SOURCE', max_length=11, null=False)
 
     class Meta:
