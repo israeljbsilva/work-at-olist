@@ -17,5 +17,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-docs/', schema_view.with_ui(), name='schema-swagger-ui'),
     path(api_path, include(urls, urls.app_name)),
-    path('ping/', ping, name='ping')
+    path('ping', ping, name='ping')
 ]
