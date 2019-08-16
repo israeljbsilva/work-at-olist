@@ -32,7 +32,7 @@ def task_pricing_rules():  # pragma: no cover
                 telefone_bill = TelephoneBill(
                     call_id=call_start_record.call_id,
                     destination=call_start_record.destination, 
-                    call_start_date=call_start_record.timestamp,
+                    call_start_timestamp=call_start_record.timestamp,
                     call_start_time=call_start_record.timestamp.strftime('%H:%M:%S'),
                     call_duration=str(call_duration),
                     call_price=call_price,
@@ -40,10 +40,10 @@ def task_pricing_rules():  # pragma: no cover
                 )
                 telefone_bill.save(force_insert=True)
             else:
-                # Essa chamada já foi calculada
+                # This call has already been calculated.
                 pass
     else:
-        # Não existe nenhuma ligação completa para realizar o calculo da chamada
+        # There is no complete call to calculate the call
         pass
 
 

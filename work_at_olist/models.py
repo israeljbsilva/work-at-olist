@@ -36,7 +36,7 @@ class CallStartRecord(AbstractCallRecord, models.Model):
 class TelephoneBill(models.Model):
     call_id = UUIDField(primary_key=True, default=uuid.uuid4, serialize=False, editable=False, unique=True)
     destination = CharField('DESTINATION', max_length=11, null=False)
-    call_start_date = models.DateTimeField('CALL_START_DATE', null=False)
+    call_start_timestamp = models.DateTimeField('CALL_START_DATE', null=False)
     call_start_time = models.CharField('CALL_START_TIME', max_length=8, null=False)
     call_duration = models.CharField('CALL_DURATION', max_length=32, null=False)
     call_price = models.DecimalField(decimal_places=2, max_digits=17, default=Decimal("0.0"), null=False)
