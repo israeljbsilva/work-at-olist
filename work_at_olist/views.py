@@ -3,10 +3,10 @@ import os
 from django.http import JsonResponse
 from django.utils import timezone
 
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 
-from .models import CallStartRecord, CallEndRecord
-from .serializers import CallStartRecordSerializer, CallEndRecordSerializer
+from .models import CallStartRecord, CallEndRecord, TelephoneBill
+from .serializers import CallStartRecordSerializer, CallEndRecordSerializer, TelephoneBillSerializer
 
 
 def ping(request):
@@ -26,3 +26,11 @@ class CallStartRecordView(viewsets.ModelViewSet):
 class CallEndRecordView(viewsets.ModelViewSet):
     queryset = CallEndRecord.objects.all()
     serializer_class = CallEndRecordSerializer
+
+
+class PhoneBillView(viewsets.GenericViewSet, mixins.ListModelMixin):
+    queryset = TelephoneBill.objects.all()
+    serializer_class = TelephoneBillSerializer
+
+    def list(self, request, *args, **kwargs):
+        return super().list(self, request, *args, **kwargs)
