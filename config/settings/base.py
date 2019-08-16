@@ -165,3 +165,8 @@ USE_TZ = True
 STATIC_ROOT = str(ROOT_DIR('staticfiles'))
 STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+# Call charges
+FIXED_CHARGES = env.float('FIXED_CHARGES', default=0.36)
+STANDARD_TIME_CALL_RATE = env.float('STANDARD_TIME_CALL_RATE', default=0.09)

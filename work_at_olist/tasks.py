@@ -1,5 +1,7 @@
 import sys
 
+from django.conf import settings
+
 from decimal import Decimal
 
 from background_task import background
@@ -25,21 +27,18 @@ def task_pricing_rules():  # pragma: no cover
                 timestamp_start = call_start_record.timestamp
                 timestamp_end = call_end_record.timestamp
 
-                _calculate_call_price(timestamp_start, timestamp_end)
+                call_price, call_duration = _calculate_call_price(timestamp_start, timestamp_end)
 
-
-                #  realizar o calculo
-
-                # salvar
-                '''telefone_bill = TelephoneBill(
+                telefone_bill = TelephoneBill(
                     call_id=call_start_record.call_id,
                     destination=call_start_record.destination, 
                     call_start_date=call_start_record.timestamp,
-                    call_start_time=call_start_record.timestamp,
-                    call_duration='',
-                    call_price='',
+                    call_start_time=call_start_record.timestamp.strftime('%H:%M:%S'),
+                    call_duration=str(call_duration),
+                    call_price=call_price,
                     source=call_start_record.source
-                )'''
+                )
+                telefone_bill.save(force_insert=True)
             else:
                 # Essa chamada já foi calculada
                 pass
@@ -48,9 +47,24 @@ def task_pricing_rules():  # pragma: no cover
         pass
 
 
-def _calculate_call_price(timestamp_start: str, timestamp_end: str) -> Decimal:
-    dt = timestamp_start - timestamp_end
-    print(dt)
+def _calculate_call_price(timestamp_start: str, timestamp_end: str):
+    call_price = 0
+    call_duration = timestamp_end - timestamp_start
+    time_start = int(timestamp_start.strftime('%H%M'))
+    call_price += settings.FIXED_CHARGES
+
+    if 600 <= time_start <= 2200:
+        call_duration_in_minutes = int(call_duration.seconds / 60)
+        total_standard_time_call_charges = call_duration_in_minutes * settings.STANDARD_TIME_CALL_RATE
+        call_price += total_standard_time_call_charges
+
+    # if the call is more than one day old, add the full day rate value
+    if call_duration.days == 1:
+        minutes_full_standard_time_call = 959
+        standard_full_day_call_rates = minutes_full_standard_time_call * settings.STANDARD_TIME_CALL_RATE
+        call_price += standard_full_day_call_rates
+
+    return Decimal(call_price), call_duration
 
 
 if 'process_tasks' in sys.argv:  # pragma: no cover
