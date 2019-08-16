@@ -48,7 +48,7 @@ class PhoneBillView(viewsets.GenericViewSet, mixins.ListModelMixin):
                 'subscriber_telephone_number',
                 'query',
                 description='The subscriber telephone number. Ex: 48984359057',
-                required=False,
+                required=True,
                 type='string'
             ),
             Parameter(
