@@ -1,3 +1,4 @@
+import logging
 import sys
 
 from django.conf import settings
@@ -9,8 +10,10 @@ from background_task import background
 from .models import CallEndRecord, CallStartRecord, TelephoneBill
 
 
-@background()
-def task_pricing_rules():  # pragma: no cover
+logger = logging.getLogger(__name__)
+
+
+def pricing_rules():  # pragma: no cover
     call_id_start_records = CallStartRecord.objects.values_list('call_id', flat=True)
     call_id_end_records = CallEndRecord.objects.values_list('call_id', flat=True)
 
@@ -24,16 +27,14 @@ def task_pricing_rules():  # pragma: no cover
                 call_end_record = \
                     [call_end_record for call_end_record in CallEndRecord.objects.filter(call_id=call_id)][0]
 
-                timestamp_start = call_start_record.timestamp
-                timestamp_end = call_end_record.timestamp
-
-                call_price, call_duration = _calculate_call_price(timestamp_start, timestamp_end)
+                call_price, call_duration = calculate_call_price(
+                    call_start_record.timestamp, call_end_record.timestamp)
 
                 telefone_bill = TelephoneBill(
                     call_id=call_start_record.call_id,
                     destination=call_start_record.destination,
-                    call_start_timestamp=timestamp_start,
-                    call_end_timestamp=timestamp_end,
+                    call_start_timestamp=call_start_record.timestamp,
+                    call_end_timestamp=call_end_record.timestamp,
                     call_start_time=call_start_record.timestamp.strftime('%H:%M:%S'),
                     call_duration=str(call_duration),
                     call_price=call_price,
@@ -41,14 +42,18 @@ def task_pricing_rules():  # pragma: no cover
                 )
                 telefone_bill.save(force_insert=True)
             else:
-                # This call has already been calculated.
-                pass
+                logger.info('This call has already been calculated.')
     else:
-        # There is no complete call to calculate the call
-        pass
+        logger.info('There is no complete call to calculate the call.')
 
 
-def _calculate_call_price(timestamp_start: str, timestamp_end: str):
+@background()
+def task_pricing_rules():
+    logger.debug('Running Pricing Rules Task.')
+    pricing_rules()
+
+
+def calculate_call_price(timestamp_start: str, timestamp_end: str):
     call_price = 0
     call_duration = timestamp_end - timestamp_start
     time_start = int(timestamp_start.strftime('%H%M'))
@@ -70,7 +75,7 @@ def _calculate_call_price(timestamp_start: str, timestamp_end: str):
 
     # if the call is more than one day old, add the full day rate value
     if call_duration.days == 1:
-        minutes_full_standard_time_call = 959
+        minutes_full_standard_time_call = 960
         standard_full_day_call_rates = minutes_full_standard_time_call * settings.STANDARD_TIME_CALL_RATE
         call_price += standard_full_day_call_rates
 
