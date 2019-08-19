@@ -51,12 +51,21 @@ def _calculate_call_price(timestamp_start: str, timestamp_end: str):
     call_price = 0
     call_duration = timestamp_end - timestamp_start
     time_start = int(timestamp_start.strftime('%H%M'))
+    time_end = int(timestamp_end.strftime('%H%M'))
     call_price += settings.FIXED_CHARGES
+    standard_time_call_charges = False
 
     if 600 <= time_start <= 2200:
+        standard_time_call_charges = True
         call_duration_in_minutes = int(call_duration.seconds / 60)
         total_standard_time_call_charges = call_duration_in_minutes * settings.STANDARD_TIME_CALL_RATE
         call_price += total_standard_time_call_charges
+
+    if time_end >= 2200 or 0 <= time_end <= 600:
+        if standard_time_call_charges:
+            call_duration_in_minutes = time_end - 2200
+            total_standard_time_call_charges = call_duration_in_minutes * settings.STANDARD_TIME_CALL_RATE
+            call_price -= total_standard_time_call_charges
 
     # if the call is more than one day old, add the full day rate value
     if call_duration.days == 1:
