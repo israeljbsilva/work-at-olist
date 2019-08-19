@@ -27,5 +27,5 @@ def telephone_bill_previous_month():
     last_month = first_day_month - datetime.timedelta(days=1)
     return TelephoneBillFactory(
         call_id=uuid.uuid4(), destination='48984359051', call_start_timestamp=last_month,
-        call_start_time='06:00:00', call_duration='0:02:46.956000', call_price=Decimal('0.54'),
-        source='48984359052')
+        call_end_timestamp=last_month, call_start_time='06:00:00', call_duration='0:02:46.956000',
+        call_price=Decimal('0.54'), source='48984359052')
