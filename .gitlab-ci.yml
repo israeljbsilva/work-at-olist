@@ -1,0 +1,31 @@
+stages:
+  - build
+  - test
+
+docker build image:
+  stage: build
+  tags: [docker]
+  only: [master]
+  dependencies: []
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  before_script:
+    - export BUILD_DATE=`date +%Y-%m-%dT%H:%M:%S`
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"gitlab-ci-token\",\"password\":\"$CI_BUILD_TOKEN\"}}}" > /kaniko/.docker/config.json
+  script:
+    - /kaniko/executor --context $CI_PROJECT_DIR --build-arg arg_revision=$CI_COMMIT_SHORT_SHA --build-arg arg_build_date=$BUILD_DATE --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+
+unit test and code-convention:
+    stage: test
+    tags: [docker]
+    image: registry.gitlab.com/israeljbsilva/work-at-olist:master
+    script:
+      - apk update && apk add gcc make postgresql-dev python3-dev musl-dev
+      - make setup
+      - make code-convention
+      - make test
+    artifacts:
+       paths:
+         - reports
+       expire_in: 10min

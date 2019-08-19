@@ -72,13 +72,13 @@ class PhoneBillView(viewsets.GenericViewSet, mixins.ListModelMixin):
                 return Response({'message': 'The reference period is not in the correct format.',
                                 'correct_format': '(month/year). Ex: 08/2019'}, HTTP_400_BAD_REQUEST)
             month, year = reference_period.split('/')
-            filters.add(Q(call_start_timestamp__month=month, call_start_timestamp__year=year), Q.AND)
+            filters.add(Q(call_end_timestamp__month=month, call_end_timestamp__year=year), Q.AND)
         else:
             today = datetime.date.today()
             first_day_month = today.replace(day=1)
             last_month = first_day_month - datetime.timedelta(days=1)
-            filters.add(Q(call_start_timestamp__month=last_month.strftime("%m"),
-                          call_start_timestamp__year=last_month.strftime("%Y")), Q.AND)
+            filters.add(Q(call_end_timestamp__month=last_month.strftime("%m"),
+                          call_end_timestamp__year=last_month.strftime("%Y")), Q.AND)
         result_page = self.paginator.paginate_queryset(self.queryset.filter(filters), request)
         serializer = TelephoneBillSerializer(result_page, many=True)
         return self.paginator.get_paginated_response(serializer.data)
