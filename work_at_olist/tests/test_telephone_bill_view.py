@@ -56,4 +56,3 @@ def test_should_not_list_telephone_bill_with_incorrect_reference_period_format(c
         'message': 'The reference period is not in the correct format.',
         'correct_format': '(month/year). Ex: 08/2019'
     }
-
