@@ -32,7 +32,8 @@ def task_pricing_rules():  # pragma: no cover
                 telefone_bill = TelephoneBill(
                     call_id=call_start_record.call_id,
                     destination=call_start_record.destination,
-                    call_start_timestamp=call_start_record.timestamp,
+                    call_start_timestamp=timestamp_start,
+                    call_end_timestamp=timestamp_end,
                     call_start_time=call_start_record.timestamp.strftime('%H:%M:%S'),
                     call_duration=str(call_duration),
                     call_price=call_price,
