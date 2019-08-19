@@ -1,6 +1,8 @@
 import logging
 import sys
 
+from datetime import timedelta
+
 from django.conf import settings
 
 from decimal import Decimal
@@ -13,7 +15,7 @@ from .models import CallEndRecord, CallStartRecord, TelephoneBill
 logger = logging.getLogger(__name__)
 
 
-def pricing_rules():  # pragma: no cover
+def save_calculated_phone_bill():
     call_id_start_records = CallStartRecord.objects.values_list('call_id', flat=True)
     call_id_end_records = CallEndRecord.objects.values_list('call_id', flat=True)
 
@@ -30,17 +32,7 @@ def pricing_rules():  # pragma: no cover
                 call_price, call_duration = calculate_call_price(
                     call_start_record.timestamp, call_end_record.timestamp)
 
-                telefone_bill = TelephoneBill(
-                    call_id=call_start_record.call_id,
-                    destination=call_start_record.destination,
-                    call_start_timestamp=call_start_record.timestamp,
-                    call_end_timestamp=call_end_record.timestamp,
-                    call_start_time=call_start_record.timestamp.strftime('%H:%M:%S'),
-                    call_duration=str(call_duration),
-                    call_price=call_price,
-                    source=call_start_record.source
-                )
-                telefone_bill.save(force_insert=True)
+                save_telephone_bill(call_start_record, call_end_record, call_duration, call_price)
             else:
                 logger.info('This call has already been calculated.')
     else:
@@ -48,9 +40,28 @@ def pricing_rules():  # pragma: no cover
 
 
 @background()
-def task_pricing_rules():
+def task_save_calculated_phone_bill():  # pragma: no cover
     logger.debug('Running Pricing Rules Task.')
-    pricing_rules()
+    save_calculated_phone_bill()
+
+
+if 'process_tasks' in sys.argv:  # pragma: no cover
+    task_save_calculated_phone_bill(verbose_name='task_pricing_rules')
+
+
+def save_telephone_bill(call_start_record: CallStartRecord, call_end_record: CallEndRecord,
+                        call_duration: timedelta, call_price: Decimal):
+    telephone_bill = TelephoneBill(
+        call_id=call_start_record.call_id,
+        destination=call_start_record.destination,
+        call_start_timestamp=call_start_record.timestamp,
+        call_end_timestamp=call_end_record.timestamp,
+        call_start_time=call_start_record.timestamp.strftime('%H:%M:%S'),
+        call_duration=str(call_duration),
+        call_price=call_price,
+        source=call_start_record.source
+    )
+    telephone_bill.save(force_insert=True)
 
 
 def calculate_call_price(timestamp_start: str, timestamp_end: str):
@@ -80,7 +91,3 @@ def calculate_call_price(timestamp_start: str, timestamp_end: str):
         call_price += standard_full_day_call_rates
 
     return Decimal(call_price), call_duration
-
-
-if 'process_tasks' in sys.argv:  # pragma: no cover
-    task_pricing_rules(verbose_name='task_pricing_rules')
